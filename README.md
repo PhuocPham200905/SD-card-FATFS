@@ -1,93 +1,93 @@
 # SDCard FATFS
 
-Project nay tong hop tai lieu, schematic, video demo va cac file thu vien C de giao tiep the nho SD Card voi vi dieu khien STM32 thong qua SPI, su dung FatFs de doc/ghi file.
+Project này tổng hợp tài liệu, schematic, video demo và các file thư viện C để giao tiếp thẻ nhớ SD Card với vi điều khiển STM32 thông qua SPI, sử dụng FatFs để đọc/ghi file.
 
-## Muc tieu
+## Mục Tiêu
 
-- Khoi tao va mount SD Card bang FatFs.
-- Doc va ghi file tren the nho SD Card.
-- Kiem tra dung luong tong va dung luong con trong.
-- Tich hop driver SD Card cap thap voi `user_diskio.c` cua FatFs.
-- In trang thai hoat dong qua UART de de debug.
+- Khởi tạo và mount SD Card bằng FatFs.
+- Đọc và ghi file trên thẻ nhớ SD Card.
+- Kiểm tra tổng dung lượng và dung lượng còn trống.
+- Tích hợp driver SD Card cấp thấp với `user_diskio.c` của FatFs.
+- In trạng thái hoạt động qua UART để dễ debug.
 
-## Cau truc thu muc
+## Cấu Trúc Thư Mục
 
 ```text
 SDCard FATFS/
-|-- File thu vien/
-|   |-- Ket noi thu vien FATFS voi driver phan cung/
+|-- File thư viện/
+|   |-- Kết nối thư viện FATFS với driver phần cứng/
 |   |   `-- user_diskio.c
-|   |-- Thu vien Driver the nho cap thap/
+|   |-- Thư viện Driver thẻ nhớ cấp thấp/
 |   |   |-- fatfs_sd.c.c
 |   |   `-- fatfs_sd.h.h
-|   |-- Thu vien Giao tiep SPI/
+|   |-- Thư viện Giao tiếp SPI/
 |   |   |-- spi.c.c
 |   |   `-- spi.h.h
-|   |-- Thu vien Giao tiep UART/
+|   |-- Thư viện Giao tiếp UART/
 |   |   |-- usart.c.c
 |   |   `-- usart.h.h
-|   |-- Thu vien su dung SD Card/
+|   |-- Thư viện sử dụng SD Card/
 |   |   |-- sd_card.c.c
 |   |   `-- sd_card.h.h
 |   `-- main.c/
-|       `-- Cac bien va thu vien can them vao main.pdf
-|-- Kien thuc tong quat/
-|   `-- Kien thuc tong quat.pdf
+|       `-- Các biến và thư viện cần thêm vào main.pdf
+|-- Kiến thức tổng quát/
+|   `-- Kiến thức tổng quát.pdf
 |-- Schematic/
 |   `-- Schematic.pdf
-|-- Video demo ket qua chay thuc te/
+|-- Video demo kết quả chạy thực tế/
 |   `-- Link_demo_kqua.docx
-|-- Video demo mach tich hop/
-|   |-- So do mach.pdf
-|   |-- code_mach_tong.rar
-|   `-- video demo ket qua.pdf
-`-- Video huong dan chay/
+|-- Video demo mạch tích hợp/
+|   |-- Sơ đồ mạch.pdf
+|   |-- code_mạch_tổng.rar
+|   `-- video demo kết quả.pdf
+`-- Video hướng dẫn chạy/
     `-- Link_hdchay.docx
 ```
 
-Luu y: Ten thu muc/file trong repo co the co dau tieng Viet. Phan cau truc ben tren da duoc viet khong dau de README hien thi on dinh tren nhieu terminal.
+Lưu ý: Một số tên thư mục/file trong repo có dấu tiếng Việt. Nếu terminal hiển thị lỗi mã hóa, hãy xem trực tiếp trên GitHub hoặc mở bằng trình soạn thảo hỗ trợ UTF-8.
 
-## Thanh phan chinh
+## Thành Phần Chính
 
 ### `fatfs_sd`
 
-Driver cap thap de giao tiep SD Card qua SPI. File nay xu ly cac lenh SD/MMC nhu `CMD0`, `CMD8`, `CMD17`, `CMD24`, doc/ghi block 512 byte va cac lenh `ioctl` can thiet cho FatFs.
+Driver cấp thấp để giao tiếp SD Card qua SPI. File này xử lý các lệnh SD/MMC như `CMD0`, `CMD8`, `CMD17`, `CMD24`, đọc/ghi block 512 byte và các lệnh `ioctl` cần thiết cho FatFs.
 
-Mac dinh driver dung:
+Mặc định driver sử dụng:
 
 - SPI: `hspi1`
-- Chan CS: `PA4`
+- Chân CS: `PA4`
 - MCU header: `stm32f1xx_hal.h`
 
 ### `user_diskio.c`
 
-File cau noi giua FatFs va driver phan cung. Cac ham `USER_initialize`, `USER_read`, `USER_write`, `USER_ioctl` duoc chuyen tiep sang cac ham trong `fatfs_sd`.
+File cầu nối giữa FatFs và driver phần cứng. Các hàm `USER_initialize`, `USER_read`, `USER_write`, `USER_ioctl` được chuyển tiếp sang các hàm trong `fatfs_sd`.
 
 ### `sd_card`
 
-Thu vien muc cao de thao tac voi SD Card:
+Thư viện mức cao để thao tác với SD Card:
 
-- `SD_Init_Mount()`: mount SD Card, tu format neu chua co filesystem.
-- `SD_Write_File(char *filename, char *data)`: ghi them du lieu vao cuoi file.
-- `SD_Read_File(char *filename)`: doc noi dung file va gui ra UART.
-- `SD_Check_Capacity()`: kiem tra tong dung luong va dung luong con trong.
+- `SD_Init_Mount()`: mount SD Card, tự format nếu chưa có filesystem.
+- `SD_Write_File(char *filename, char *data)`: ghi thêm dữ liệu vào cuối file.
+- `SD_Read_File(char *filename)`: đọc nội dung file và gửi ra UART.
+- `SD_Check_Capacity()`: kiểm tra tổng dung lượng và dung lượng còn trống.
 
-## Yeu cau
+## Yêu Cầu
 
-### Phan cung
+### Phần Cứng
 
-- Vi dieu khien STM32, project hien tai dang dung HAL cho dong STM32F1.
-- Module SD Card giao tiep SPI.
-- The nho microSD da format FAT/FAT32.
-- Ket noi UART de xem log/debug.
+- Vi điều khiển STM32, project hiện tại đang dùng HAL cho dòng STM32F1.
+- Module SD Card giao tiếp SPI.
+- Thẻ nhớ microSD đã format FAT/FAT32.
+- Kết nối UART để xem log/debug.
 
-### Phan mem
+### Phần Mềm
 
-- STM32CubeIDE hoac moi truong build STM32 HAL tuong duong.
-- STM32CubeMX neu can cau hinh lai SPI, UART, GPIO va FatFs.
-- FatFs middleware duoc bat trong project STM32.
+- STM32CubeIDE hoặc môi trường build STM32 HAL tương đương.
+- STM32CubeMX nếu cần cấu hình lại SPI, UART, GPIO và FatFs.
+- FatFs middleware được bật trong project STM32.
 
-## Ket noi phan cung tham khao
+## Kết Nối Phần Cứng Tham Khảo
 
 | SD Card Module | STM32 SPI1 |
 | --- | --- |
@@ -98,26 +98,26 @@ Thu vien muc cao de thao tac voi SD Card:
 | VCC | 3.3V |
 | GND | GND |
 
-Luu y: Neu dung chan CS khac, can sua lai macro `SD_CS_PORT` va `SD_CS_PIN` trong driver `fatfs_sd`.
+Lưu ý: Nếu dùng chân CS khác, cần sửa lại macro `SD_CS_PORT` và `SD_CS_PIN` trong driver `fatfs_sd`.
 
-## Cach tich hop vao project STM32
+## Cách Tích Hợp Vào Project STM32
 
-1. Bat SPI, UART va FatFs trong STM32CubeMX/STM32CubeIDE.
-2. Cau hinh SPI o che do Master, 8-bit, CPOL Low, CPHA 1 Edge, NSS Software.
-3. Them cac file thu vien vao project:
+1. Bật SPI, UART và FatFs trong STM32CubeMX/STM32CubeIDE.
+2. Cấu hình SPI ở chế độ Master, 8-bit, CPOL Low, CPHA 1 Edge, NSS Software.
+3. Thêm các file thư viện vào project:
    - `fatfs_sd.c`, `fatfs_sd.h`
    - `sd_card.c`, `sd_card.h`
    - `user_diskio.c`
-   - cac file `spi.c/h`, `usart.c/h` neu can tham khao cau hinh
-4. Kiem tra lai ten file khi copy vao project. Trong repo nay mot so file dang co duoi mo rong lap lai nhu `.c.c` va `.h.h`; khi dua vao STM32CubeIDE nen doi ve `.c` va `.h`.
-5. Dam bao `user_diskio.c` include dung file:
+   - các file `spi.c/h`, `usart.c/h` nếu cần tham khảo cấu hình
+4. Kiểm tra lại tên file khi copy vào project. Trong repo này một số file đang có đuôi mở rộng lặp lại như `.c.c` và `.h.h`; khi đưa vào STM32CubeIDE nên đổi về `.c` và `.h`.
+5. Đảm bảo `user_diskio.c` include đúng file:
 
 ```c
 #include "ff_gen_drv.h"
 #include "fatfs_sd.h"
 ```
 
-6. Trong `main.c`, goi cac ham theo thu tu:
+6. Trong `main.c`, gọi các hàm theo thứ tự:
 
 ```c
 MX_GPIO_Init();
@@ -131,39 +131,39 @@ SD_Write_File("test.txt", "Hello SD Card");
 SD_Read_File("test.txt");
 ```
 
-## Cau hinh SPI
+## Cấu Hình SPI
 
-Trong file SPI mau, toc do SPI dang duoc dat cham de tang do on dinh khi khoi tao the:
+Trong file SPI mẫu, tốc độ SPI đang được đặt chậm để tăng độ ổn định khi khởi tạo thẻ:
 
 ```c
 hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
 ```
 
-Sau khi mount thanh cong co the tang toc do SPI neu mach va the nho hoat dong on dinh. Neu gap loi mount/doc/ghi, nen giu toc do cham de debug truoc.
+Sau khi mount thành công có thể tăng tốc độ SPI nếu mạch và thẻ nhớ hoạt động ổn định. Nếu gặp lỗi mount/đọc/ghi, nên giữ tốc độ chậm để debug trước.
 
 ## Debug UART
 
-Thu vien `sd_card.c` gui thong bao trang thai qua UART, vi du:
+Thư viện `sd_card.c` gửi thông báo trạng thái qua UART, ví dụ:
 
-- mount thanh cong/that bai
-- loi ghi file
-- noi dung file doc duoc
-- dung luong the nho
+- mount thành công/thất bại
+- lỗi ghi file
+- nội dung file đọc được
+- dung lượng thẻ nhớ
 
-Hay mo terminal serial dung baudrate da cau hinh trong project de xem log.
+Hãy mở terminal serial đúng baudrate đã cấu hình trong project để xem log.
 
-## Tai lieu va demo
+## Tài Liệu Và Demo
 
-- `Schematic/Schematic.pdf`: so do mach.
-- Thu muc kien thuc tong quat: tai lieu nen ve SD Card/FatFs.
-- Thu muc video huong dan chay: link video huong dan chay.
-- Thu muc video demo ket qua chay thuc te: link video ket qua thuc te.
-- Thu muc video demo mach tich hop: tai lieu va demo cho mach tich hop.
+- `Schematic/Schematic.pdf`: sơ đồ mạch.
+- Thư mục kiến thức tổng quát: tài liệu nền về SD Card/FatFs.
+- Thư mục video hướng dẫn chạy: link video hướng dẫn chạy.
+- Thư mục video demo kết quả chạy thực tế: link video kết quả thực tế.
+- Thư mục video demo mạch tích hợp: tài liệu và demo cho mạch tích hợp.
 
-## Ghi chu
+## Ghi Chú
 
-- SD Card nen dung nguon 3.3V on dinh.
-- Neu module SD Card khong co chuyen muc logic, can dam bao muc tin hieu phu hop voi STM32.
-- Khi loi mount, can kiem tra lai chan CS, day SPI, format the va cau hinh FatFs.
-- Nen format the nho FAT32 truoc khi thu nghiem.
+- SD Card nên dùng nguồn 3.3V ổn định.
+- Nếu module SD Card không có chuyển mức logic, cần đảm bảo mức tín hiệu phù hợp với STM32.
+- Khi lỗi mount, cần kiểm tra lại chân CS, dây SPI, format thẻ và cấu hình FatFs.
+- Nên format thẻ nhớ FAT32 trước khi thử nghiệm.
 
